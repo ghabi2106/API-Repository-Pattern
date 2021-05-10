@@ -1,5 +1,7 @@
 ﻿using DLL.Models;
 using DLL.Models.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
@@ -13,20 +15,21 @@ using System.Threading.Tasks;
 
 namespace DLL.DBContext
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<
+            ApplicationUser, ApplicationRole, int,
+            IdentityUserClaim<int>, ApplicationUserRole, IdentityUserLogin<int>,
+            IdentityRoleClaim<int>, IdentityUserToken<int>>
+
+
     {
         private const string IsDeletedProperty = "IsDeleted";
+
         private static readonly MethodInfo _propertyMethod = typeof(EF)
             .GetMethod(nameof(EF.Property), BindingFlags.Static | BindingFlags.Public)?.MakeGenericMethod(typeof(bool));
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions options) : base(options)
         {
         }
-
-        public DbSet<Department> Departments { get; set; }
-        public DbSet<Student> Students { get; set; }
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<CourseStudent> CourseStudents { get; set; }
 
         private static LambdaExpression GetIsDeletedRestriction(Type type)
         {
@@ -36,8 +39,11 @@ namespace DLL.DBContext
             var lambda = Expression.Lambda(condition, parm);
             return lambda;
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CustomerBalance>()
+                .Property(p => p.RowVersion).IsConcurrencyToken();
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
                 if (typeof(ISoftDeletable).IsAssignableFrom(entity.ClrType) == true)
@@ -47,6 +53,7 @@ namespace DLL.DBContext
                 }
             }
 
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<CourseStudent>()
                 .HasKey(bc => new { bc.CourseId, bc.StudentId });
             modelBuilder.Entity<CourseStudent>()
@@ -57,8 +64,59 @@ namespace DLL.DBContext
                 .HasOne(bc => bc.Student)
                 .WithMany(c => c.CourseStudents)
                 .HasForeignKey(bc => bc.StudentId);
-            base.OnModelCreating(modelBuilder);
-        }      
+
+
+            modelBuilder.Entity<ApplicationUser>(b =>
+            {
+                // Each User can have many UserClaims
+                b.HasMany(e => e.Claims)
+                    .WithOne()
+                    .HasForeignKey(uc => uc.UserId)
+                    .IsRequired();
+
+                // Each User can have many UserLogins
+                b.HasMany(e => e.Logins)
+                    .WithOne()
+                    .HasForeignKey(ul => ul.UserId)
+                    .IsRequired();
+
+                // Each User can have many UserTokens
+                b.HasMany(e => e.Tokens)
+                    .WithOne()
+                    .HasForeignKey(ut => ut.UserId)
+                    .IsRequired();
+
+                // Each User can have many entries in the UserRole join table
+                b.HasMany(e => e.UserRoles)
+                    .WithOne(e => e.User)
+                    .HasForeignKey(ur => ur.UserId)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<ApplicationRole>(b =>
+            {
+                // Each Role can have many entries in the UserRole join table
+                b.HasMany(e => e.UserRoles)
+                    .WithOne(e => e.Role)
+                    .HasForeignKey(ur => ur.RoleId)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<Course>(c =>
+            {
+                c.Property(d => d.Name).HasMaxLength(100);
+                c.Property(d => d.Code).HasMaxLength(50);
+                c.Property(d => d.CreatedBy).HasMaxLength(100);
+                c.Property(d => d.LastUpdatedBy).HasMaxLength(100);
+            });
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            OnBeforeSavingData();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
         private void OnBeforeSavingData()
         {
             ChangeTracker.DetectChanges();
@@ -84,18 +142,26 @@ namespace DLL.DBContext
                             break;
                     }
                 }
-
             }
         }
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        {
-            OnBeforeSavingData();
-            return base.SaveChanges(acceptAllChangesOnSuccess);
-        }
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             OnBeforeSavingData();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
+
+        public DbSet<Department> Departments { get; set; }
+
+        public DbSet<Student> Students { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseStudent> CourseStudents { get; set; }
+
+        // for concurrecy Example
+        public DbSet<CustomerBalance> CustomerBalances { get; set; }
+
+        public DbSet<TransactionHistory> TransactionHistories { get; set; }
+        // end concurrency example
     }
 }

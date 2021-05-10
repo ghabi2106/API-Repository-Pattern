@@ -2,6 +2,7 @@
 using DLL.DBContext;
 using DLL.Models;
 using DLL.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,18 +17,32 @@ namespace BLL.Services
         Task InsertData();
         Task DummyData1();
         Task DummyData2();
+        Task AddNewRoles();
+        Task AddNewUser();
+        //Task CreateAndroidAndWebClient();
     }
 
     public class TestService : ITestService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ApplicationDbContext _context;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        //private readonly IOpenIddictApplicationManager _openIddictApplicationManager;
 
 
-        public TestService(IUnitOfWork unitOfWork, ApplicationDbContext context)
+        public TestService(IUnitOfWork unitOfWork,
+            ApplicationDbContext context, RoleManager<ApplicationRole> roleManager,
+            UserManager<ApplicationUser> userManager
+            //IOpenIddictApplicationManager openIddictApplicationManager
+            )
         {
             _unitOfWork = unitOfWork;
             _context = context;
+            _roleManager = roleManager;
+            _userManager = userManager;
+            //_openIddictApplicationManager = openIddictApplicationManager;
+            //_openIddictApplicationManager = openIddictApplicationManager;
         }
 
         public async Task InsertData()
@@ -68,7 +83,6 @@ namespace BLL.Services
 
         public async Task DummyData2()
         {
-
             // var courseDummy = new Faker<Course>()
             //     .RuleFor(o => o.Name, f => f.Name.FirstName())
             //     .RuleFor(o => o.Code, f => f.Name.LastName())
@@ -99,5 +113,133 @@ namespace BLL.Services
                 count += 5;
             }
         }
+
+        public async Task AddNewRoles()
+        {
+            var roleList = new List<string>()
+            {
+                "admin",
+                "manager",
+                "supervisor"
+            };
+
+            foreach (var role in roleList)
+            {
+                var exits = await _roleManager.FindByNameAsync(role);
+
+                if (exits == null)
+                {
+                    await _roleManager.CreateAsync(new ApplicationRole()
+                    {
+                        Name = role
+                    });
+                }
+            }
+        }
+
+        public async Task AddNewUser()
+        {
+            var userList = new List<ApplicationUser>()
+            {
+                new ApplicationUser()
+                {
+                    UserName = "tapos.aa@gmail.com",
+                    Email = "tapos.aa@gmail.com",
+                    FullName = "biswa nath ghosh tapos"
+                },
+                new ApplicationUser()
+                {
+                    UserName = "sanjib@gmail.com",
+                    Email = "sanjib@gmail.com",
+                    FullName = "sanjib dhar"
+                },
+                new ApplicationUser()
+                {
+                    UserName = "monir@gmail.com",
+                    Email = "monir@gmail.com",
+                    FullName = "monir hossain"
+                },
+            };
+
+            foreach (var user in userList)
+            {
+                var userExits = await _userManager.FindByEmailAsync(user.Email);
+
+                if (userExits == null)
+                {
+                    var insertedData = await _userManager.CreateAsync(user, "abc123$..A!");
+
+                    if (insertedData.Succeeded)
+                    {
+                        var myRole = "";
+                        if (user.Email == "tapos.aa@gmail.com")
+                        {
+                            myRole = "admin";
+                        }
+                        else if (user.Email == "sanjib@gmail.com")
+                        {
+                            myRole = "manager";
+                        }
+                        else if (user.Email == "monir@gmail.com")
+                        {
+                            myRole = "supervisor";
+                        }
+
+                        await _userManager.AddToRoleAsync(user, myRole);
+                    }
+                }
+            }
+        }
+
+        //public async Task CreateAndroidAndWebClient()
+        //{
+        //    var listOfClient = new List<OpenIddictApplicationDescriptor>()
+        //    {
+        //        new OpenIddictApplicationDescriptor()
+        //        {
+        //            ClientId = "udemy_android_application",
+        //            ClientSecret = "udemy123",
+        //            DisplayName = "our android client",
+        //            Permissions =
+        //            {
+        //                OpenIddictConstants.Permissions.Endpoints.Authorization,
+        //                OpenIddictConstants.Permissions.Endpoints.Logout,
+        //                OpenIddictConstants.Permissions.Endpoints.Token,
+        //                OpenIddictConstants.Permissions.GrantTypes.Password,
+        //                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+        //                OpenIddictConstants.Permissions.Scopes.Email,
+        //                OpenIddictConstants.Permissions.Scopes.Profile,
+        //                OpenIddictConstants.Permissions.Scopes.Roles,
+        //            }
+        //        },
+        //        new OpenIddictApplicationDescriptor()
+        //        {
+        //            ClientId = "udemy_web_application",
+        //            ClientSecret = "udemy456",
+        //            DisplayName = "our web application client",
+        //            Permissions =
+        //            {
+        //                OpenIddictConstants.Permissions.Endpoints.Authorization,
+        //                OpenIddictConstants.Permissions.Endpoints.Logout,
+        //                OpenIddictConstants.Permissions.Endpoints.Token,
+        //                OpenIddictConstants.Permissions.GrantTypes.Password,
+        //                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+        //                OpenIddictConstants.Permissions.Scopes.Email,
+        //                OpenIddictConstants.Permissions.Scopes.Profile,
+        //                OpenIddictConstants.Permissions.Scopes.Roles,
+        //            }
+        //        }
+        //    };
+
+        //    foreach (var application in listOfClient)
+        //    {
+        //        var applicationExists = await _openIddictApplicationManager.FindByClientIdAsync(application.ClientId);
+
+        //        if (applicationExists == null)
+        //        {
+        //            await _openIddictApplicationManager.CreateAsync(application);
+        //        }
+        //    }
+        //}
     }
 }
