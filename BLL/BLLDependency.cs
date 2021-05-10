@@ -1,4 +1,5 @@
-﻿using BLL.Request;
+﻿using BLL.Helpers;
+using BLL.Request;
 using BLL.Services;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,8 @@ namespace BLL
             services.AddTransient<ITestService, TestService>();
             services.AddTransient<ICourseService, CourseService>();
             services.AddTransient<ICourseStudentService, CourseStudentService>();
+            services.AddTransient<ITransactionService, TransactionService>();
+            services.AddTransient<IFileValidate, FileValidate>();
 
             AllFluentValidationDependency(services);
         }
