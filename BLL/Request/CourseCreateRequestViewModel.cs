@@ -1,5 +1,7 @@
-﻿using BLL.Services;
+﻿using BLL.Helpers;
+using BLL.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,7 @@ namespace BLL.Request
         public string Name { get; set; }
         public string Code { get; set; }
         public decimal Credit { get; set; }
+        public IFormFile CourseImage { get; set; }
     }
 
     public class CourseCreateRequestViewModelValidator : AbstractValidator<CourseCreateRequestViewModel>
@@ -22,15 +25,19 @@ namespace BLL.Request
         private readonly IServiceProvider _serviceProvider;
 
 
-        public CourseCreateRequestViewModelValidator(IServiceProvider serviceProvider)
+        public CourseCreateRequestViewModelValidator(IServiceProvider serviceProvider, IFileValidate fileValidate)
         {
             _serviceProvider = serviceProvider;
 
             RuleFor(x => x.Name).NotNull()
-                .NotEmpty().MinimumLength(4).MaximumLength(25).MustAsync(NameExists).WithMessage("name exists in our system");
+                .NotEmpty().MinimumLength(4).MaximumLength(25).MustAsync(NameExists)
+                .WithMessage("name exists in our system");
             RuleFor(x => x.Code).NotNull()
-                .NotEmpty().MinimumLength(3).MaximumLength(10).MustAsync(CodeExists).WithMessage("code exists in our system");
+                .NotEmpty().MinimumLength(3).MaximumLength(10).MustAsync(CodeExists)
+                .WithMessage("code exists in our system");
             RuleFor(x => x.Credit).NotEmpty().NotNull();
+            RuleFor(x => x.CourseImage).NotNull()
+                .SetValidator(new CustomFileValidator<CourseCreateRequestViewModel, IFormFile>(fileValidate));
 
         }
 

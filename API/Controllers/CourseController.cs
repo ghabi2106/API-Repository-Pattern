@@ -34,7 +34,7 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Create(CourseCreateRequestViewModel request)
+        public async Task<IActionResult> Create([FromForm] CourseCreateRequestViewModel request)
         {
             return Ok(await _courseService.CreateAsync(request));
         }
