@@ -4,6 +4,7 @@ using DLL.Models;
 using DLL.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace BLL.Services
         Task DummyData2();
         Task AddNewRoles();
         Task AddNewUser();
-        //Task CreateAndroidAndWebClient();
+        Task CreateAndroidAndWebClient();
     }
 
     public class TestService : ITestService
@@ -28,21 +29,20 @@ namespace BLL.Services
         private readonly ApplicationDbContext _context;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        //private readonly IOpenIddictApplicationManager _openIddictApplicationManager;
+        private readonly IOpenIddictApplicationManager _openIddictApplicationManager;
 
 
         public TestService(IUnitOfWork unitOfWork,
             ApplicationDbContext context, RoleManager<ApplicationRole> roleManager,
-            UserManager<ApplicationUser> userManager
-            //IOpenIddictApplicationManager openIddictApplicationManager
+            UserManager<ApplicationUser> userManager,
+            IOpenIddictApplicationManager openIddictApplicationManager
             )
         {
             _unitOfWork = unitOfWork;
             _context = context;
             _roleManager = roleManager;
             _userManager = userManager;
-            //_openIddictApplicationManager = openIddictApplicationManager;
-            //_openIddictApplicationManager = openIddictApplicationManager;
+            _openIddictApplicationManager = openIddictApplicationManager;
         }
 
         public async Task InsertData()
@@ -143,21 +143,21 @@ namespace BLL.Services
             {
                 new ApplicationUser()
                 {
-                    UserName = "tapos.aa@gmail.com",
-                    Email = "tapos.aa@gmail.com",
-                    FullName = "biswa nath ghosh tapos"
+                    UserName = "assaad.ghabi@gmail.com",
+                    Email = "assaad.ghabi@gmail.com",
+                    FullName = "Assaad Ghabi"
                 },
                 new ApplicationUser()
                 {
-                    UserName = "sanjib@gmail.com",
-                    Email = "sanjib@gmail.com",
-                    FullName = "sanjib dhar"
+                    UserName = "assaad@gmail.com",
+                    Email = "assaad@gmail.com",
+                    FullName = "Assaad"
                 },
                 new ApplicationUser()
                 {
-                    UserName = "monir@gmail.com",
-                    Email = "monir@gmail.com",
-                    FullName = "monir hossain"
+                    UserName = "ghabi@gmail.com",
+                    Email = "ghabi@gmail.com",
+                    FullName = "Ghabi"
                 },
             };
 
@@ -172,15 +172,15 @@ namespace BLL.Services
                     if (insertedData.Succeeded)
                     {
                         var myRole = "";
-                        if (user.Email == "tapos.aa@gmail.com")
+                        if (user.Email == "assaad.ghabi@gmail.com")
                         {
                             myRole = "admin";
                         }
-                        else if (user.Email == "sanjib@gmail.com")
+                        else if (user.Email == "assaad@gmail.com")
                         {
                             myRole = "manager";
                         }
-                        else if (user.Email == "monir@gmail.com")
+                        else if (user.Email == "ghabi@gmail.com")
                         {
                             myRole = "supervisor";
                         }
@@ -191,55 +191,55 @@ namespace BLL.Services
             }
         }
 
-        //public async Task CreateAndroidAndWebClient()
-        //{
-        //    var listOfClient = new List<OpenIddictApplicationDescriptor>()
-        //    {
-        //        new OpenIddictApplicationDescriptor()
-        //        {
-        //            ClientId = "udemy_android_application",
-        //            ClientSecret = "udemy123",
-        //            DisplayName = "our android client",
-        //            Permissions =
-        //            {
-        //                OpenIddictConstants.Permissions.Endpoints.Authorization,
-        //                OpenIddictConstants.Permissions.Endpoints.Logout,
-        //                OpenIddictConstants.Permissions.Endpoints.Token,
-        //                OpenIddictConstants.Permissions.GrantTypes.Password,
-        //                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-        //                OpenIddictConstants.Permissions.Scopes.Email,
-        //                OpenIddictConstants.Permissions.Scopes.Profile,
-        //                OpenIddictConstants.Permissions.Scopes.Roles,
-        //            }
-        //        },
-        //        new OpenIddictApplicationDescriptor()
-        //        {
-        //            ClientId = "udemy_web_application",
-        //            ClientSecret = "udemy456",
-        //            DisplayName = "our web application client",
-        //            Permissions =
-        //            {
-        //                OpenIddictConstants.Permissions.Endpoints.Authorization,
-        //                OpenIddictConstants.Permissions.Endpoints.Logout,
-        //                OpenIddictConstants.Permissions.Endpoints.Token,
-        //                OpenIddictConstants.Permissions.GrantTypes.Password,
-        //                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-        //                OpenIddictConstants.Permissions.Scopes.Email,
-        //                OpenIddictConstants.Permissions.Scopes.Profile,
-        //                OpenIddictConstants.Permissions.Scopes.Roles,
-        //            }
-        //        }
-        //    };
+        public async Task CreateAndroidAndWebClient()
+        {
+            var listOfClient = new List<OpenIddictApplicationDescriptor>()
+            {
+                new OpenIddictApplicationDescriptor()
+                {
+                    ClientId = "test_android_application",
+                    ClientSecret = "test123",
+                    DisplayName = "our android client",
+                    Permissions =
+                    {
+                        OpenIddictConstants.Permissions.Endpoints.Authorization,
+                        OpenIddictConstants.Permissions.Endpoints.Logout,
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.Password,
+                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                        OpenIddictConstants.Permissions.Scopes.Email,
+                        OpenIddictConstants.Permissions.Scopes.Profile,
+                        OpenIddictConstants.Permissions.Scopes.Roles,
+                    }
+                },
+                new OpenIddictApplicationDescriptor()
+                {
+                    ClientId = "test_web_application",
+                    ClientSecret = "test456",
+                    DisplayName = "our web application client",
+                    Permissions =
+                    {
+                        OpenIddictConstants.Permissions.Endpoints.Authorization,
+                        OpenIddictConstants.Permissions.Endpoints.Logout,
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.Password,
+                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                        OpenIddictConstants.Permissions.Scopes.Email,
+                        OpenIddictConstants.Permissions.Scopes.Profile,
+                        OpenIddictConstants.Permissions.Scopes.Roles,
+                    }
+                }
+            };
 
-        //    foreach (var application in listOfClient)
-        //    {
-        //        var applicationExists = await _openIddictApplicationManager.FindByClientIdAsync(application.ClientId);
+            foreach (var application in listOfClient)
+            {
+                var applicationExists = await _openIddictApplicationManager.FindByClientIdAsync(application.ClientId);
 
-        //        if (applicationExists == null)
-        //        {
-        //            await _openIddictApplicationManager.CreateAsync(application);
-        //        }
-        //    }
-        //}
+                if (applicationExists == null)
+                {
+                    await _openIddictApplicationManager.CreateAsync(application);
+                }
+            }
+        }
     }
 }

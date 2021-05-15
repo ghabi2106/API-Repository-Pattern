@@ -21,9 +21,13 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // await _testService.AddNewRoles();
-            // await _testService.AddNewUser();
-            await _transactionService.FinancialTransaction();
+            //await _testService.InsertData();
+            //await _testService.DummyData1();
+            //await _testService.DummyData2();
+            //await _testService.AddNewRoles();
+            //await _testService.AddNewUser();
+            //await _transactionService.FinancialTransaction();
+            await _testService.CreateAndroidAndWebClient();
             return Ok("hello world");
         }
     }

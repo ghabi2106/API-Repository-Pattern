@@ -1,16 +1,18 @@
-﻿using BLL.Request;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Mime;
+using System.Threading.Tasks;
+using BLL.Request;
 using DLL.Models;
 using DLL.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Minio;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Utility;
 using Utility.Exceptions;
+using Utility.Helpers;
 
 namespace BLL.Services
 {
@@ -25,6 +27,7 @@ namespace BLL.Services
         Task<bool> IsCodeExists(string code);
         Task<bool> IsNameExists(string name);
         Task<bool> IsIdExists(int id);
+        Task Testing(RequestMaker loginUser);
 
     }
 
@@ -197,6 +200,13 @@ namespace BLL.Services
             return await _unitOfWork.CourseRepository.Exists(x => x.Id == id);
         }
 
+        public Task Testing(RequestMaker loginUser)
+        {
 
+            var userId = loginUser.Principal.GetUserId();
+            var userName = loginUser.Principal.GetUserName();
+            var userRole = loginUser.Principal.GetUserRole();
+            throw new NotImplementedException();
+        }
     }
 }

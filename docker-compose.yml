@@ -68,26 +68,31 @@ services:
     #        - MONGO_INITDB_ROOT_PASSWORD=admin123
     #    networks: 
     #        - mytestproject
-    #mymysql:
-    #    image: percona:latest
-    #    container_name: mymysql
-    #    ports:
-    #        - 3306:3306
-    #    environment:
-    #        - MYSQL_ROOT_PASSWORD=admin123
-    #        - MYSQL_USER=ghabi
-    #        - MYSQL_PASSWORD=admin123
-    #    networks: 
-    #        - mytestproject
-    #myphpadmin:
-    #    image: phpmyadmin/phpmyadmin
-    #    container_name: myphpadmin
-    #    ports:
-    #        - 8080:80
-    #    environment:
-    #        - MYSQL_ROOT_PASSWORD=admin123
-    #    networks: 
-    #        - mytestproject
+    mymysql:
+        image: percona:latest
+        container_name: mymysql
+        ports:
+            - 3306:3306
+        environment:
+            - MYSQL_ROOT_PASSWORD=admin123
+            - MYSQL_USER=ghabi
+            - MYSQL_PASSWORD=admin123
+            - MYSQL_DATABASE= default_schema
+        networks: 
+            - mytestproject
+    myphpadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: myphpadmin
+        ports:
+            - 8080:80
+        environment:
+            - MYSQL_ROOT_PASSWORD=admin123
+            - MYSQL_USER=ghabi
+            - MYSQL_PASSWORD=admin123
+        links:
+            -  mymysql:db 
+        networks: 
+            - mytestproject
     #myrabbit:
     #    image: rabbitmq:management
     #    container_name: myrabbit

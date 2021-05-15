@@ -53,9 +53,9 @@ namespace WebApplication1
             });
 
 
-            //DbConfiguration(services);
+            DbConfiguration(services);
             IdentitySetup(services);
-            //OpenIddictSetup(services);
+            OpenIddictSetup(services);
 
             DLLDependency.AllDependency(services, Configuration);
             BLLDependency.AllDependency(services, Configuration);
@@ -69,12 +69,15 @@ namespace WebApplication1
             // Use 'MariaDbServerVersion' for MariaDB.
             // Alternatively, use 'ServerVersion.AutoDetect(connectionString)'.
             // For common usages, see pull request #1233.
-            var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+            //var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
 
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseOpenIddict<int>()
+            //    .UseMySql(Configuration.GetConnectionString("DefaultConnection"), serverVersion)
+            //);
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseOpenIddict<int>()
-                .UseMySql(Configuration.GetConnectionString("DefaultConnection"), serverVersion)
-            );
+                    options.UseOpenIddict<int>()
+                    .UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
         }
 
         private void OpenIddictSetup(IServiceCollection services)
@@ -163,34 +166,34 @@ namespace WebApplication1
                     }
                 });
 
-                //c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                //{
-                //    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
-                //      Enter 'Bearer' [space] and then your token in the text input below.
-                //      \r\n\r\nExample: 'Bearer 12345abcdef'",
-                //    Name = "Authorization",
-                //    In = ParameterLocation.Header,
-                //    Type = SecuritySchemeType.ApiKey,
-                //    Scheme = "Bearer"
-                //});
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
 
-                //c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                //{
-                //    {
-                //        new OpenApiSecurityScheme
-                //        {
-                //            Reference = new OpenApiReference
-                //            {
-                //                Type = ReferenceType.SecurityScheme,
-                //                Id = "Bearer"
-                //            },
-                //            Scheme = "oauth2",
-                //            Name = "Bearer",
-                //            In = ParameterLocation.Header
-                //        },
-                //        new List<string>()
-                //    }
-                //});
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
             });
         }
 
